@@ -1,19 +1,25 @@
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+package domain;
+
+import webService.WebApiServer;
+
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Controller {
     private static Scanner in;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
         in = new Scanner(System.in);
+
+        WebApiServer server = new WebApiServer();
+        server.start(5000);
 
         while (true) {
             String input = getUserInput("Please choose an option: 1) Register 2) Login 3) Exit");
-            if (!input.isBlank() && isDigit(input)) {
-                if (Integer.parseInt(input) == 3) break;
+            if (!input.isBlank() && Validator.isDigit(input)) {
+                if (Integer.parseInt(input) == 3) {
+                    server.stop();
+                    break;
+                }
                 executeCommand(input);
             }
         }
@@ -30,34 +36,24 @@ public class Controller {
         return input;
     }
 
-    private static boolean isDigit(String value) {
-        try {
-            Integer.parseInt(value);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    private static void register() {
+    private static void register() throws ClassNotFoundException {
         User user = getRegistrationInfo();
 
-        if (isValidRegisterInfo(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword())) {
+        if (Validator.isValidRegisterInfo(user)) {
             user.addUser();
             System.out.println("Successfully registered.");
-        } else {
-            System.out.println("ERROR: Could not register. Please enter valid information.");
         }
+        System.out.println("Registration failed.");
     }
 
-    private static User getRegistrationInfo() {
+    private static User getRegistrationInfo() throws ClassNotFoundException {
         System.out.println("---REGISTRATION---");
 
         String firstName = getUserInput("Please enter your first name:");
         String lastName = getUserInput("Please enter your last name:");
         String email = getUserInput("Please enter your email:");
         String password = getUserInput(
-                "Please enter a password that follows the following guidelines:\n"+
+                "Please enter a password that follows the following guidelines:\n" +
                         "- 8-20 characters\n" +
                         "- contains at least one digit\n" +
                         "- contains at least one upper case alphabet\n" +
@@ -68,37 +64,7 @@ public class Controller {
         return new User(firstName, lastName, email, password);
     }
 
-    private static boolean isValidRegisterInfo(String firstName, String lastName, String email, String password) {
-        return !firstName.isBlank() &&
-                !lastName.isBlank() &&
-                !email.isBlank() && isValidEmailAddress(email) &&
-                !password.isBlank() && isValidPassword(password);
-    }
-
-    private static boolean isValidEmailAddress(String email) {
-        try {
-            InternetAddress emailAddress = new InternetAddress(email);
-            emailAddress.validate();
-        } catch (AddressException e) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static boolean isValidPassword(String password) {
-        String regex = "^(?=.*[0-9])"
-                + "(?=.*[a-z])(?=.*[A-Z])"
-                + "(?=.*[@#$%^&+=])"
-                + "(?=\\S+$).{8,20}$";
-
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(password);
-
-        return m.matches();
-    }
-
-    private static void login() {
+    private static void login() throws ClassNotFoundException {
         System.out.println("---LOGIN---");
 
         String email = getUserInput("Please enter your email:");
@@ -111,7 +77,7 @@ public class Controller {
         }
     }
 
-    private static void executeCommand(String choice) {
+    private static void executeCommand(String choice) throws ClassNotFoundException {
         if (Integer.parseInt(choice) == 1) {
             register();
         } else if (Integer.parseInt(choice) == 2) {

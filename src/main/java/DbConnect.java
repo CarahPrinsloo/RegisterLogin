@@ -1,10 +1,14 @@
+package database.DatabaseInteraction;
+
+import database.DatabaseInteraction.DataObjects.UserDO;
+
 import java.io.File;
 import java.sql.*;
 
 public class DbConnect {
     private final String DISK_DB_URL = "jdbc:sqlite:";
 
-    private String userDbFilename = System.getProperty("user.dir") + "/src/main/java/Database/Users_DB.sqlite";
+    private String userDbFilename = System.getProperty("user.dir") + "/src/main/java/database/Users_DB.sqlite";
     private String dbUrl;
 
     public DbConnect() throws ClassNotFoundException {
@@ -25,8 +29,7 @@ public class DbConnect {
     private Connection dbConnect() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            final Connection connection = DriverManager.getConnection(dbUrl);
-            return connection;
+            return DriverManager.getConnection(dbUrl);
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
             throw new RuntimeException("Could not connect to the database");
@@ -37,33 +40,12 @@ public class DbConnect {
         connection.close();
     }
 
-    public boolean create(User user) throws ClassNotFoundException {
-        Connection connection = dbConnect();
-
-        try (final PreparedStatement stmt = connection.prepareStatement(
-                "INSERT INTO users(email, first_name, last_name, password) VALUES (?, ?, ?, ?)"
-        )) {
-            stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getFirstName());
-            stmt.setString(3, user.getLastName());
-            stmt.setString(4, user.getPassword());
-
-            final boolean gotAResultSet = stmt.execute();
-
-            if (gotAResultSet || !(stmt.getUpdateCount() == 1)) {
-                dbDisconnect(connection);
-                throw new RuntimeException("Could not create user.");
-            } else {
-                dbDisconnect(connection);
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public User read(String email) throws SQLException {
+    /**
+     * Get a user by email.
+     * @param email the email of the user
+     * @return a Domain.User
+     */
+    public UserDO get(String email) throws SQLException {
         Connection connection = dbConnect();
 
         try(final PreparedStatement stmt = connection.prepareStatement(
@@ -84,7 +66,7 @@ public class DbConnect {
                     final String userPassword = results.getString( "password");
 
                     dbDisconnect(connection);
-                    return new User(userFirstName, userLastName, userEmail, userPassword);
+                    return new UserDO(userFirstName, userLastName, userEmail, userPassword);
                 }
             }
         } catch (SQLException e) {
@@ -94,7 +76,44 @@ public class DbConnect {
         return null;
     }
 
-    public boolean update(User user, String currentUserEmail) throws ClassNotFoundException, SQLException {
+    /**
+     * Add a single user to the database.
+     * @param user the user to add
+     * @return the newly added Domain.User
+     */
+    public UserDO add(UserDO user) {
+        Connection connection = dbConnect();
+
+        try (final PreparedStatement stmt = connection.prepareStatement(
+                "INSERT INTO users(email, first_name, last_name, password) VALUES (?, ?, ?, ?)"
+        )) {
+            stmt.setString(1, user.getEmail());
+            stmt.setString(2, user.getFirstName());
+            stmt.setString(3, user.getLastName());
+            stmt.setString(4, user.getPassword());
+
+            final boolean gotAResultSet = stmt.execute();
+
+            if (gotAResultSet || !(stmt.getUpdateCount() == 1)) {
+                dbDisconnect(connection);
+                throw new RuntimeException("Could not create user.");
+            } else {
+                dbDisconnect(connection);
+                return user;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Update a single user in the database.
+     * @param user the user to add
+     * @param currentUserEmail the email of the user to update
+     * @return true if the user information was updated
+     */
+    public boolean update(UserDO user, String currentUserEmail) throws SQLException {
         Connection connection = dbConnect();
 
         try(final PreparedStatement stmt = connection.prepareStatement(
@@ -126,29 +145,4 @@ public class DbConnect {
         }
         return false;
     }
-
-    public boolean delete(String userEmail) throws ClassNotFoundException, SQLException {
-        Connection connection = dbConnect();
-
-        try(final PreparedStatement stmt = connection.prepareStatement(
-                "DELETE FROM users WHERE email = ?"
-        )) {
-            stmt.setString(1, userEmail);
-
-            final boolean gotAResultSet = stmt.execute();
-            if (gotAResultSet || !(stmt.getUpdateCount() == 1)) {
-                dbDisconnect(connection);
-                throw new RuntimeException("Could not create user.");
-            } else {
-                dbDisconnect(connection);
-                return true;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            dbDisconnect(connection);
-        }
-        return false;
-    }
-
 }
