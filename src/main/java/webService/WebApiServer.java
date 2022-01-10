@@ -1,4 +1,4 @@
-package WebService;
+package webService;
 
 import io.javalin.Javalin;
 

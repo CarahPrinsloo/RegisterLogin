@@ -1,6 +1,6 @@
-package Domain;
+package domain;
 
-import Database.DatabaseInteraction.DataObjects.UserDO;
+import orm.UserDO;
 
 public class User {
     private String firstName;
@@ -19,16 +19,6 @@ public class User {
         userDAO = new UserDO(firstName, lastName, email, password);
     }
 
-    public User addUser() throws ClassNotFoundException {
-        UserDO user = userDAO.addUser();
-
-        if (user == null) {
-            System.out.println("ERROR: Could not register user.");
-            return null;
-        }
-        return DAOToUser(user);
-    }
-
     private User DAOToUser(UserDO userDAO) throws ClassNotFoundException {
         return new User(
                 userDAO.getFirstName(),
@@ -38,8 +28,8 @@ public class User {
         );
     }
 
-    public static boolean isRegistered(String email, String password) throws ClassNotFoundException {
-        return UserDO.isRegistered(email, password);
+    public void addUser() {
+
     }
 
     public String getFirstName() {

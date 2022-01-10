@@ -1,3 +1,7 @@
-/home/carah/team-demo/Registration/src/main/java/User.java
-/home/carah/team-demo/Registration/src/main/java/DbConnect.java
-/home/carah/team-demo/Registration/src/main/java/Controller.java
+/home/carah/temp1/RegisterLogin/src/main/java/Domain/Controller.java
+/home/carah/temp1/RegisterLogin/src/main/java/WebService/WebApiServer.java
+/home/carah/temp1/RegisterLogin/src/main/java/Database/DatabaseInteraction/DbConnect.java
+/home/carah/temp1/RegisterLogin/src/main/java/Database/DatabaseInteraction/DataObjects/UserDO.java
+/home/carah/temp1/RegisterLogin/src/main/java/Domain/User.java
+/home/carah/temp1/RegisterLogin/src/main/java/WebService/WebApiHandler.java
+/home/carah/temp1/RegisterLogin/src/main/java/Domain/Validator.java

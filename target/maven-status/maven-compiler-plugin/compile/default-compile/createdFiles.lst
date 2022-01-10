@@ -1,3 +1,7 @@
-DbConnect.class
-Controller.class
-User.class
+WebService/WebApiHandler.class
+Domain/User.class
+Domain/Validator.class
+Database/DatabaseInteraction/DataObjects/UserDO.class
+Domain/Controller.class
+WebService/WebApiServer.class
+Database/DatabaseInteraction/DbConnect.class

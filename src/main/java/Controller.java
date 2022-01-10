@@ -1,14 +1,18 @@
-package domain;
-
+import domain.User;
+import domain.Validator;
+import orm.UserDO;
 import webService.WebApiServer;
 
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Controller {
     private static Scanner in;
+    private static DbConnect db;
 
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
         in = new Scanner(System.in);
+        db = new DbConnect();
 
         WebApiServer server = new WebApiServer();
         server.start(5000);
@@ -23,6 +27,8 @@ public class Controller {
                 executeCommand(input);
             }
         }
+
+        db.disconnect();
     }
 
     private static String getUserInput(String prompt) {
@@ -40,7 +46,7 @@ public class Controller {
         User user = getRegistrationInfo();
 
         if (Validator.isValidRegisterInfo(user)) {
-            user.addUser();
+            db.add(new UserDO(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword()));
             System.out.println("Successfully registered.");
         }
         System.out.println("Registration failed.");
@@ -70,11 +76,24 @@ public class Controller {
         String email = getUserInput("Please enter your email:");
         String password = getUserInput("Please enter your password");
 
-        if (User.isRegistered(email, password)) {
+        if (isRegistered(email) && isCorrectLoginInfo(email, password)) {
             System.out.println("Successfully logged in.");
         } else {
             System.out.println("Could not log-in. Please register.");
         }
+    }
+
+    private static boolean isRegistered(String email) throws ClassNotFoundException {
+        DbConnect db = new DbConnect();
+
+        return db.get(email) != null;
+    }
+
+    private static boolean isCorrectLoginInfo(String email, String password) throws ClassNotFoundException {
+        DbConnect db = new DbConnect();
+        UserDO userDO = db.get(email);
+
+        return userDO != null && userDO.getPassword().equals(password);
     }
 
     private static void executeCommand(String choice) throws ClassNotFoundException {
